@@ -79,6 +79,7 @@ export class List {
          { field: "uomUnit", title: "Satuan", sortable: false },
          { field: "price", title: "Harga", sortable: false },
          { field: "doCurrencyCode", title: "Mata Uang", sortable: false },
+         { field: "doCurrencyRate", title: "Rate", sortable: false },
          { field: "productRemark", title: "Keterangan", sortable: false },
            { field: "createdBy", title: "Staff Pembelian", sortable: false },
          { field: "EPOcreatedBy", title: "Staff Pembelian (P/O)", sortable: false },         
@@ -92,6 +93,8 @@ export class List {
          },
 
          { field: "UnitName", title: "Nama Unit", sortable: false },
+         { field: "INNo", title: "No Nota Intern", sortable: false },
+         { field: "TermPayment", title: "Term Pembayaran", sortable: false },
     ];
 
     search() {

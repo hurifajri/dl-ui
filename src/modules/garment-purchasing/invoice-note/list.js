@@ -14,7 +14,8 @@ export class List {
             }
         },
         { field: "supplier.Name", title: "Nama Supplier" },
-        { field: "items", title: "List Nomor Surat Jalan", sortable: false }
+        { field: "items", title: "List Nomor Surat Jalan", sortable: false },
+        { field: "CreatedBy", title: "Admin Pembelian" }
     ];
 
     loader = (info) => {

@@ -23,6 +23,11 @@ export class Item {
                 noteNo: this.data.salesNoteNo
             };
         }
+        this.useVat=this.context.context.options.useVat;
+        if(this.data.id){
+            this.useVat=this.data.useVat;
+        }
+
     }
 
     get salesNoteLoader() {
@@ -31,7 +36,8 @@ export class Item {
 
     get salesNoteFilter() {
         return {
-            buyerId: this.context.context.options.buyerId
+            buyerId: this.context.context.options.buyerId,
+            useVat:this.useVat
         };
     }
 
@@ -41,10 +47,24 @@ export class Item {
             this.data.salesNoteNo = newValue.noteNo;
             this.service.getSalesNoteById(newValue.id)
                 .then(sn => {
-                    this.data.salesAmount = sn.items.reduce((acc, cur) => acc += cur.price * cur.quantity, 0);
+                    this.service.searchReturnNoteItem({ filter: JSON.stringify({ SalesNoteId: this.data.salesNoteId }) })
+                        .then(rniResult => {
+                            let totalAmount = 0;
+                            for (const item of rniResult.data) {
+                                var ppn= 0;
+                                const salesNoteItem = sn.items.find(i => i.id == item.salesNoteItemId);
+                                if(sn.useVat){
+                                    ppn=(item.returnQuantity * salesNoteItem.price)*0.1
+                                }
+                                totalAmount += (item.returnQuantity * salesNoteItem.price)+ppn;
+                            }
+                            this.data.salesAmount = sn.items.reduce((acc, cur) => acc += (cur.price * cur.quantity) + (cur.price * cur.quantity*0.1), 0) - totalAmount;
+                        });
                 });
         } else {
-
+            delete this.data.salesNoteId;
+            delete this.data.salesNoteNo;
+            this.data.salesAmount = 0;
         }
     }
 }

@@ -2,6 +2,7 @@ import { inject, bindable, computedFrom } from "aurelia-framework";
 import { Service } from "./service";
 import moment from "moment";
 let AvalAreaLoader = require("../../../loader/output-aval-loader");
+let DOAvalLoader = require("../../../loader/do-aval-loader");
 @inject(Service)
 export class DataForm {
   @bindable title;
@@ -36,6 +37,15 @@ export class DataForm {
   constructor(service) {
     this.service = service;
   }
+
+  get doAvalLoader() {
+    return DOAvalLoader;
+  }
+
+  doAvalTextFormatter = (doAval) => {
+    return `${doAval.DOAvalNo}`
+  }
+
   DOFormatter = (DoItem) => {
     return `${DoItem.DeliveryOrderSalesNO}`
   }
@@ -73,6 +83,12 @@ export class DataForm {
     this.detailOptions = {
       isEdit: this.isEdit
     };
+
+    if (this.data.deliveryOrderAvalId && this.data.deliveryOrderAvalNo) {
+      this.selectedDOAval = {};
+      this.selectedDOAval.Id = this.data.deliveryOrderAvalId;
+      this.selectedDOAval.DOAvalNo = this.data.deliveryOrderAvalNo;
+    }
 
     if (this.readOnly) {
       this.dyeingPrintingBuyerItemsColumns = [
@@ -266,17 +282,17 @@ export class DataForm {
     }
   }
 
-  DOLoader = (e) => {
-    var listDo = [
-      {
-        "DeliveryOrderSalesID": 52,
-        "DeliveryOrderSalesNO": "20US000017"
-      }
-    ]
-    return Promise.resolve(true).then(result => {
-      return listDo;
-    });
-  }
+  // DOLoader = (e) => {
+  //   var listDo = [
+  //     {
+  //       "DeliveryOrderSalesID": 52,
+  //       "DeliveryOrderSalesNO": "20US000017"
+  //     }
+  //   ]
+  //   return Promise.resolve(true).then(result => {
+  //     return listDo;
+  //   });
+  // }
 
   reset() {
     this.data.Date = undefined;
@@ -353,7 +369,15 @@ export class DataForm {
   selectedAvalBonChanged(n, o) {
     if (this.data.id == 0 || this.data.id == undefined || this.data.id == null) {
       this.service.getById(n.id).then((selectedBon) => {
-        this.data.doNO = selectedBon.deliveryOrderSalesNo;
+        // this.data.doNO = selectedBon.deliveryOrderSalesNo;
+        if (selectedBon.deliveryOrderAvalId && selectedBon.deliveryOrderAvalNo) {
+          
+          this.data.deliveryOrderAvalId = selectedBon.deliveryOrderAvalId;
+          this.data.deliveryOrderAvalNo = selectedBon.deliveryOrderAvalNo;
+          this.selectedDOAval = {};
+          this.selectedDOAval.Id = this.data.deliveryOrderAvalId;
+          this.selectedDOAval.DOAvalNo = this.data.deliveryOrderAvalNo;
+        }
         this.data.DyeingPrintingItems = selectedBon.avalItems.filter(s => !s.hasNextAreaDocument);
       });
 
@@ -376,8 +400,11 @@ export class DataForm {
 
     if (n != o && !this.data.id) {
       this.data.DyeingPrintingItems.splice(0, this.data.DyeingPrintingItems.length);
-      this.data.selectedAvalBon = null;
+      this.selectedAvalBon = null;
       this.data.doNO = null;
+      this.data.deliveryOrderAvalId = 0;
+      this.data.deliveryOrderAvalNo = null;
+      this.selectedDOAval = null;
 
     }
     // if( n!=o){
@@ -385,5 +412,17 @@ export class DataForm {
     // this.data.DyeingPrintingItemsBuyer = null;
     // this.data.doNO = null;
     // }
+  }
+
+  @bindable selectedDOAval;
+  selectedDOAvalChanged(n, o) {
+    if (this.selectedDOAval) {
+      this.data.deliveryOrderAvalId = this.selectedDOAval.Id;
+      this.data.deliveryOrderAvalNo = this.selectedDOAval.DOAvalNo;
+
+    } else {
+      this.data.deliveryOrderAvalId = 0;
+      this.data.deliveryOrderAvalNo = null;
+    }
   }
 }

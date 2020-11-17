@@ -7,10 +7,21 @@ import numeral from 'numeral';
 @inject(Router, Service)
 export class List {
     context = ["Rincian", "Cetak PDF"];
-    columns = [
+    columns = [{
+            field: "IsPosted",
+            title: "IsPosted Checkbox",
+            checkbox: true,
+            sortable: false,
+            formatter: function(value, data, index) {
+                this.checkboxEnabled = !data.IsPosted;
+                return ""
+            }
+        },
         { field: "No", title: "No Bukti Pengeluaran Bank" },
         {
-            field: "Date", title: "Tanggal", formatter: function (value, data, index) {
+            field: "Date",
+            title: "Tanggal",
+            formatter: function(value, data, index) {
                 return moment.utc(value).local().format('DD MMM YYYY');
             },
         },
@@ -18,14 +29,20 @@ export class List {
         { field: "IncomeTaxName", title: "Pasal PPH" },
         { field: "IncomeTaxRate", title: "Rate PPH (%)" },
         {
-            field: "TotalIncomeTax", title: "Total PPH", formatter: function (value, data, index) {
-                return numeral(value).format('0,000.0000');
+            field: "TotalIncomeTax",
+            title: "Total PPH",
+            formatter: function(value, data, index) {
+                return numeral(value).format('0,000.00');
             },
+            align: 'right'
         },
         {
-            field: "TotalDPP", title: "Total DPP", formatter: function (value, data, index) {
-                return numeral(value).format('0,000.0000');
+            field: "TotalDPP",
+            title: "Total DPP",
+            formatter: function(value, data, index) {
+                return numeral(value).format('0,000.00');
             },
+            align: 'right'
         },
         { field: "Currency", title: "Mata Uang" },
         { field: "UnitPaymentOrderList", title: "No SPB", sortable: false, width: '200px' }
@@ -64,6 +81,7 @@ export class List {
         this.router = router;
         this.buyerId = "";
         this.buyers = [];
+        this.selectedItems = [];
     }
 
     contextCallback(event) {
@@ -81,5 +99,29 @@ export class List {
 
     create() {
         this.router.navigateToRoute('create');
+    }
+
+    posting() {
+        var items = this.selectedItems.map(s => s.Id);
+        this.service.posting(items)
+            .then(result => {
+                alert("Data berhasil disimpan");
+                this.error = {};
+                this.tableList.refresh();
+                this.selectedItems = [];
+            })
+            .catch(e => {
+                if (e.message) {
+                    alert("Terjadi Kesalahan Pada Sistem!\nHarap Simpan Kembali!");
+                }
+                this.error = e;
+            });
+    }
+
+    rowFormatter(data, index) {
+        if (data.IsPosted)
+            return { classes: "success" }
+        else
+            return {}
     }
 }

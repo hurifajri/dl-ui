@@ -8,31 +8,56 @@ import numeral from 'numeral';
 export class List {
     context = ['Rincian', 'Cetak PDF'];
 
-    columns = [
+    rowFormatter(data, index) {
+        if (data.IsPosted)
+            return { classes: "success" }
+        else
+            return {}
+    }
+
+    columns = [{
+            field: "IsPosted",
+            title: "IsPosted Checkbox",
+            checkbox: true,
+            sortable: false,
+            formatter: function(value, data, index) {
+                this.checkboxEnabled = !data.IsPosted;
+                return ""
+            }
+        },
         { field: 'DocumentNo', title: 'No. Bukti Pengeluaran Bank' },
         {
-            field: 'CreatedUtc', title: 'Tanggal', formatter: function (value, data, index) {
+            field: 'CreatedUtc',
+            title: 'Tanggal',
+            formatter: function(value, data, index) {
                 return moment(value).format('DD MMM YYYY');
             },
         },
         {
-            field: 'BankName', title: 'Bank', formatter: function (value, data, index) {
+            field: 'BankName',
+            title: 'Bank',
+            formatter: function(value, data, index) {
                 return data ? `${data.BankAccountName} - A/C : ${data.BankAccountNumber}` : '';
             }
         },
         {
-            field: 'GrandTotal', title: 'Total DPP+PPN', formatter: function (value, data, index) {
+            field: 'GrandTotal',
+            title: 'Total DPP+PPN',
+            formatter: function(value, data, index) {
                 return numeral(value).format('0,000.00');
             },
+            align: 'right'
         },
         { field: 'BankCurrencyCode', title: 'Mata Uang' },
         { field: 'suppliers', title: 'Supplier' },
+        { field: 'uRNNo', title: 'Nomor BTU' },
         { field: 'unitPaymentOrders', title: 'Nomor SPB' }
     ];
 
     constructor(router, service) {
         this.service = service;
         this.router = router;
+        this.selectedItems = [];
     }
 
     loader = (info) => {
@@ -54,22 +79,26 @@ export class List {
                     result.data = result.data.map((datum) => {
                         let listSupplier = [];
                         let listUnitPaymentOrderNo = [];
+                        let listURNNo = [];
 
                         for (let detail of datum.Details) {
-                            let existSupplier = listSupplier.find((supplier) => supplier == '- ' + detail.SupplierName);
-                            if (!existSupplier) {
-                                listSupplier.push('- ' + detail.SupplierName);
+                            for (let item of detail.Items) {
+                                if (item.URNNo != null)
+                                    listURNNo.push('- ' + item.URNNo);
                             }
 
+                            let existSupplier = listSupplier.find((supplier) => supplier == '- ' + detail.SupplierName);
+                            if (!existSupplier)
+                                listSupplier.push('- ' + detail.SupplierName);
+
                             let existUnitPaymentOrderNo = listUnitPaymentOrderNo.find((unitPaymentOrderNo) => unitPaymentOrderNo == '- ' + detail.UnitPaymentOrderNo);
-                            if (!existUnitPaymentOrderNo) {
+                            if (!existUnitPaymentOrderNo)
                                 listUnitPaymentOrderNo.push('- ' + detail.UnitPaymentOrderNo);
-                            }
                         }
 
                         datum.suppliers = listSupplier.join('\n');
                         datum.unitPaymentOrders = listUnitPaymentOrderNo.join('\n');
-
+                        datum.uRNNo = listURNNo.join('\n');
                         return datum;
                     })
                 }
@@ -97,5 +126,22 @@ export class List {
 
     create() {
         this.router.navigateToRoute('create');
+    }
+
+    posting() {
+        var items = this.selectedItems.map(s => s.Id);
+        this.service.posting(items)
+            .then(result => {
+                alert("Data berhasil disimpan");
+                this.error = {};
+                this.tableList.refresh();
+                this.selectedItems = [];
+            })
+            .catch(e => {
+                if (e.message) {
+                    alert("Terjadi Kesalahan Pada Sistem!\nHarap Simpan Kembali!");
+                }
+                this.error = e;
+            });
     }
 }

@@ -13,7 +13,8 @@ export class List {
             }
         },
         { field: "supplier.Name", title: "Supplier" },
-        { field: "items", title: "List No. Invoice", sortable: false }
+        { field: "items", title: "List No. Invoice", sortable: false },
+        { field: "CreatedBy", title: "Admin Pembelian" }
     ];
     
     context = ["Rincian", "Cetak PDF"];

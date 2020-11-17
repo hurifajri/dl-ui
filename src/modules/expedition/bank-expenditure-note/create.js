@@ -46,12 +46,11 @@ export class Create {
         this.data = {};
         if (!this.IDR || this.sameCurrency) {
             this.collection = {
-                columns: ['__check', 'No. SPB', 'Tanggal SPB', 'Tanggal Jatuh Tempo', 'Nomor Invoice', 'Supplier', 'Category', 'Divisi', 'PPN', 'PPh', 'Total Harga ((DPP + PPN) - PPh)', 'Mata Uang', ''],
+                columns: ['__check', 'No. SPB', 'Tanggal SPB', 'Tanggal Jatuh Tempo', 'Nomor BTU', 'Nomor Invoice', 'Supplier', 'Category', 'Divisi', 'PPN', 'PPh', 'Total Harga ((DPP + PPN) - PPh)', 'Mata Uang', ''],
             };
-        }
-        else {
+        } else {
             this.collection = {
-                columns: ['__check', 'No. SPB', 'Tanggal SPB', 'Tanggal Jatuh Tempo', 'Nomor Invoice', 'Supplier', 'Category', 'Divisi', 'PPN', 'PPh', 'Total Harga ((DPP + PPN) - PPh)', 'Mata Uang', 'Total Harga ((DPP + PPN) - PPh) (IDR)', 'Mata Uang', ''],
+                columns: ['__check', 'No. SPB', 'Tanggal SPB', 'Tanggal Jatuh Tempo', 'Nomor BTU', 'Nomor Invoice', 'Supplier', 'Category', 'Divisi', 'PPN', 'PPh', 'Total Harga ((DPP + PPN) - PPh)', 'Mata Uang', 'Total Harga ((DPP + PPN) - PPh) (IDR)', 'Mata Uang', ''],
             };
         }
         this.collectionOptions = {
@@ -205,7 +204,7 @@ export class Create {
 
         if (this.ItemsCollectionRate)
             this.ItemsCollectionRate.bind();
-        console.log(this);
+        // console.log(this);
     }
 
     @bindable selectedSupplier;
@@ -268,7 +267,7 @@ export class Create {
         this.data.Bank = newVal;
         this.IDR = false;
         if (newVal) {
-
+            console.log(newVal);
             if (this.selectedSupplier) {
                 let arg = {
                     page: 1,
@@ -292,12 +291,15 @@ export class Create {
             }
             if (!this.IDR || this.sameCurrency) {
                 this.collection = {
-                    columns: ['__check', 'No. SPB', 'Tanggal SPB', 'Tanggal Jatuh Tempo', 'Nomor Invoice', 'Supplier', 'Category', 'Divisi', 'PPN', 'PPh', 'Total Harga ((DPP + PPN) - PPh)', 'Mata Uang', ''],
+                    columns: ['__check', 'No. SPB', 'Tanggal SPB', 'Tanggal Jatuh Tempo', 'Nomor BTU', 'Nomor Invoice', 'Supplier', 'Category', 'Divisi', 'PPN', 'PPh', 'Total Harga ((DPP + PPN) - PPh)', 'Mata Uang', ''],
                 };
-            }
-            else {
+
+                this.data.CurrencyCode = this.currency;
+                this.data.CurrencyId = newVal.Id;
+                this.data.CurrencyRate = newVal.Currency.Rate;
+            } else {
                 this.collection = {
-                    columns: ['__check', 'No. SPB', 'Tanggal SPB', 'Tanggal Jatuh Tempo', 'Nomor Invoice', 'Supplier', 'Category', 'Divisi', 'PPN', 'PPh', 'Total Harga ((DPP + PPN) - PPh)', 'Mata Uang', 'Total Harga ((DPP + PPN) - PPh) (IDR)', 'Mata Uang', ''],
+                    columns: ['__check', 'No. SPB', 'Tanggal SPB', 'Tanggal Jatuh Tempo', 'Nomor BTU', 'Nomor Invoice', 'Supplier', 'Category', 'Divisi', 'PPN', 'PPh', 'Total Harga ((DPP + PPN) - PPh)', 'Mata Uang', 'Total Harga ((DPP + PPN) - PPh) (IDR)', 'Mata Uang', ''],
                 };
             }
             this.collectionOptions = {
@@ -315,12 +317,6 @@ export class Create {
             this.selectedCurrency = null;
             this.selectedSupplier = null;
         }
-        this.data.CurrencyCode = "";
-        this.data.CurrencyId = 0;
-        this.data.CurrencyRate = 0;
-        //this.data.Supplier=null;
-        this.selectedCurrency = null;
-        this.selectedSupplier = null;
     }
 
     @bindable selectedCurrency;
@@ -334,6 +330,12 @@ export class Create {
                 this.sameCurrency = true;
                 this.data.CurrencyRate = 1;
             }
+
+            this.collectionOptions = Object.assign({}, {
+                IDR: this.IDR,
+                rate: this.data.CurrencyRate,
+                SameCurrency: this.sameCurrency
+            });
             if (this.selectedSupplier) {
                 let arg = {
                     page: 1,
@@ -349,29 +351,85 @@ export class Create {
                     });
             }
 
+
+
             if (!this.IDR || this.sameCurrency) {
                 this.collection = {
-                    columns: ['__check', 'No. SPB', 'Tanggal SPB', 'Tanggal Jatuh Tempo', 'Nomor Invoice', 'Supplier', 'Category', 'Divisi', 'PPN', 'PPh', 'Total Harga ((DPP + PPN) - PPh)', 'Mata Uang', ''],
+                    columns: ['__check', 'No. SPB', 'Tanggal SPB', 'Tanggal Jatuh Tempo', 'Nomor BTU', 'Nomor Invoice', 'Supplier', 'Category', 'Divisi', 'PPN', 'PPh', 'Total Harga ((DPP + PPN) - PPh)', 'Mata Uang', ''],
                 };
-            }
-            else {
+            } else {
                 this.collection = {
-                    columns: ['__check', 'No. SPB', 'Tanggal SPB', 'Tanggal Jatuh Tempo', 'Nomor Invoice', 'Supplier', 'Category', 'Divisi', 'PPN', 'PPh', 'Total Harga ((DPP + PPN) - PPh)', 'Mata Uang', 'Total Harga ((DPP + PPN) - PPh) (IDR)', 'Mata Uang', ''],
+                    columns: ['__check', 'No. SPB', 'Tanggal SPB', 'Tanggal Jatuh Tempo', 'Nomor BTU', 'Nomor Invoice', 'Supplier', 'Category', 'Divisi', 'PPN', 'PPh', 'Total Harga ((DPP + PPN) - PPh)', 'Mata Uang', 'Total Harga ((DPP + PPN) - PPh) (IDR)', 'Mata Uang', ''],
                 };
             }
-            this.collectionOptions = {
-                IDR: this.IDR,
-                rate: this.data.CurrencyRate,
-                SameCurrency: this.sameCurrency
-            };
-        }
-        else {
+
+
+            // this.ItemsCollection.bind();
+            // this.ItemsCollectionRate.bind();
+        } else {
             this.data.CurrencyCode = null;
             this.data.CurrencyId = 0;
             this.sameCurrency = false;
             this.data.CurrencyRate = 0;
         }
     }
+
+    // @bindable selectedCurrency;
+    // async selectedCurrencyChanged(newVal) {
+    //     this.sameCurrency = false;
+    //     this.data.CurrencyRate = 0;
+    //     if (newVal) {
+    //         this.data.CurrencyCode = newVal.code;
+    //         this.data.CurrencyId = newVal.Id;
+    //         if (newVal.code == "IDR") {
+    //             this.sameCurrency = true;
+    //             this.data.CurrencyRate = 1;
+    //         }
+
+    //         this.collectionOptions = Object.assign({}, {
+    //             IDR: this.IDR,
+    //             rate: this.data.CurrencyRate,
+    //             SameCurrency: this.sameCurrency
+    //         });
+    //         if (this.selectedSupplier) {
+    //             let arg = {
+    //                 page: 1,
+    //                 size: Number.MAX_SAFE_INTEGER,
+    //                 filter: this.selectedSupplier && this.selectedSupplier.code ? JSON.stringify({ "Position": 7, "SupplierCode": this.selectedSupplier.code, "Currency": newVal.code, "IsPaid": false }) : JSON.stringify({ "Position": 7, "Currency": newVal.code, "IsPaid": false }) //CASHIER DIVISION
+    //             };
+
+    //             this.UPOResults = await this.service.searchAllByPosition(arg)
+    //                 .then((result) => {
+    //                     let resultData = result.data && result.data.length > 0 ? result.data.filter((datum) => datum.PaymentMethod && datum.PaymentMethod.toLowerCase() != "cash") : [];
+
+    //                     return resultData;
+    //                 });
+    //         }
+
+
+
+    //         if (!this.IDR || this.sameCurrency) {
+    //             this.collection = {
+    //                 columns: ['__check', 'No. SPB', 'Tanggal SPB', 'Tanggal Jatuh Tempo', 'Nomor Invoice', 'Supplier', 'Category', 'Divisi', 'PPN', 'PPh', 'Total Harga ((DPP + PPN) - PPh)', 'Mata Uang', ''],
+    //             };
+    //         }
+    //         else {
+    //             this.collection = {
+    //                 columns: ['__check', 'No. SPB', 'Tanggal SPB', 'Tanggal Jatuh Tempo', 'Nomor Invoice', 'Supplier', 'Category', 'Divisi', 'PPN', 'PPh', 'Total Harga ((DPP + PPN) - PPh)', 'Mata Uang', 'Total Harga ((DPP + PPN) - PPh) (IDR)', 'Mata Uang', ''],
+    //             };
+    //         }
+
+
+    //         // this.ItemsCollection.bind();
+    //         // this.ItemsCollectionRate.bind();
+    //     }
+    //     else {
+    //         this.data.CurrencyCode = null;
+    //         this.data.CurrencyId = 0;
+    //         this.sameCurrency = false;
+    //         this.data.CurrencyRate = 0;
+    //     }
+    // }
 
     async rateChanged(e) {
         this.collectionOptions = {
@@ -389,11 +447,11 @@ export class Create {
 
             if (this.selectedSupplier)
                 this.UPOResults = await this.service.searchAllByPosition(arg)
-                    .then((result) => {
-                        let resultData = result.data && result.data.length > 0 ? result.data.filter((datum) => datum.PaymentMethod && datum.PaymentMethod.toLowerCase() != "cash") : [];
+                .then((result) => {
+                    let resultData = result.data && result.data.length > 0 ? result.data.filter((datum) => datum.PaymentMethod && datum.PaymentMethod.toLowerCase() != "cash") : [];
 
-                        return resultData;
-                    });
+                    return resultData;
+                });
         }
     }
 
